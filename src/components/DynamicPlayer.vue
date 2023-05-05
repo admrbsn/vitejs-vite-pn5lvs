@@ -41,13 +41,13 @@ const swiperEl = ref(null);
 const videoRefs = ref([]);
 const slides = [
   {
-    src: '',
+    src: 'intro.mp4',
   },
   {
-    src: '',
+    src: 'jimmy.mp4',
   },
   {
-    src: '',
+    src: 'luke.mp4',
   },
 ];
 
