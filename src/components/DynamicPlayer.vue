@@ -1,5 +1,8 @@
 <template>
   <div class="dynamic-player">
+    <audio ref="audioRef" id="audio" playsinline>
+      <source src="audio.mp3" type="audio/mpeg" />
+    </audio>
     <swiper-container
       ref="swiperEl"
       loop
@@ -39,6 +42,7 @@ register();
 // Ref for swiper element
 const swiperEl = ref(null);
 const videoRefs = ref([]);
+const audioRef = ref(null);
 const slides = [
   {
     src: 'intro.mp4',
@@ -113,6 +117,12 @@ const playVideo = () => {
     firstVideo.addEventListener('ended', () => {
       swiperEl.value.swiper.slideNext();
     });
+    if (audioRef.value) {
+      setTimeout(() => {
+        audioRef.value.volume = 0.5;
+        audioRef.value.play();
+      }, 7000);
+    }
   }
 };
 </script>
