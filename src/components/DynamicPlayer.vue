@@ -5,7 +5,6 @@
     </audio>
     <swiper-container
       ref="swiperEl"
-      loop
       noSwiping
       init="false"
       navigation="true"
@@ -79,32 +78,33 @@ const onInit = (e) => {
   console.log('swiper initialized');
 };
 
-/*const onSlideChange = (e) => {
-  const detail = e.detail[0];
-  const index = detail.realIndex;
-  if (index >= 0 && index < videoRefs.value.length) {
-    const currentVideo = videoRefs.value[index];
-    console.log('Current video:', currentVideo);
-    console.log('Current index:', index);
-  }
-};*/
-
 const onSlideChange = (e) => {
   console.log('slide changed');
-  const currentVideo = videoRefs.value[e.detail[0].realIndex];
+  const swiper = swiperEl.value.swiper;
+  const currentIndex = e.detail[0].realIndex;
+  const previousIndex = swiper.previousIndex;
+
+  const previousVideo = videoRefs.value[previousIndex];
+  if (previousVideo) {
+    previousVideo.pause();
+    previousVideo.currentTime = 0;
+  }
+
+  const currentVideo = videoRefs.value[currentIndex];
   currentVideo.muted = false;
   currentVideo.play();
-  const currentIndex = e.detail[0].realIndex;
+
   currentVideo.addEventListener('ended', () => {
-    const nextIndex = currentIndex + 1;
+    const nextIndex = (currentIndex + 1) % videoRefs.value.length;
     const nextVideo = videoRefs.value[nextIndex];
     if (nextVideo) {
       currentVideo.pause();
+      currentVideo.currentTime = 0;
       nextVideo.muted = false;
       nextVideo.play();
-      swiperEl.value.swiper.slideNext();
+      swiper.slideNext();
     } else {
-      swiperEl.value.swiper.slideTo(0);
+      swiper.slideTo(0);
     }
   });
 };
