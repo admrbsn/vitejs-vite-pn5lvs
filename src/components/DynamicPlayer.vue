@@ -109,20 +109,30 @@ const onSlideChange = (e) => {
   });
 };
 
-const playVideo = () => {
+const playVideo = async () => {
   if (videoRefs.value.length > 0) {
     const firstVideo = videoRefs.value[0];
     firstVideo.muted = false;
-    firstVideo.play();
+
+    try {
+      await firstVideo.play();
+      if (audioRef.value) {
+        setTimeout(async () => {
+          audioRef.value.volume = 0.5;
+          try {
+            await audioRef.value.play();
+          } catch (error) {
+            console.error('Audio playback failed:', error);
+          }
+        }, 7000);
+      }
+    } catch (error) {
+      console.error('Video playback failed:', error);
+    }
+
     firstVideo.addEventListener('ended', () => {
       swiperEl.value.swiper.slideNext();
     });
-    if (audioRef.value) {
-      setTimeout(() => {
-        audioRef.value.volume = 0.5;
-        audioRef.value.play();
-      }, 7000);
-    }
   }
 };
 </script>
