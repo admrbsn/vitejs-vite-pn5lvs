@@ -127,7 +127,7 @@ const playVideo = async () => {
         }, 7000);
       }
     } catch (error) {
-      console.error('Video playback failed:', error);
+      console.error('Video playback failed yo:', error);
     }
 
     firstVideo.addEventListener('ended', () => {
