@@ -119,7 +119,16 @@ const playVideo = async () => {
 
     try {
       await firstVideo.play();
+
+      // Add this code to play the audio with a delay and set the volume
       if (audioRef.value) {
+        // Trick iOS into allowing playback after the delay
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
+        const source = audioContext.createBufferSource();
+        source.connect(audioContext.destination);
+        source.start();
+
         setTimeout(async () => {
           audioRef.value.volume = 0.5;
           try {
@@ -130,7 +139,7 @@ const playVideo = async () => {
         }, 7000);
       }
     } catch (error) {
-      console.error('Video playback failed yo:', error);
+      console.error('Video playback failed:', error);
     }
 
     firstVideo.addEventListener('ended', () => {
