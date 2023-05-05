@@ -1,7 +1,10 @@
 <template>
   <div class="dynamic-player">
     <audio ref="audioRef" id="audio" playsinline>
-      <source src="audio.mp3" type="audio/mpeg" />
+      <source
+        src="https://storage.googleapis.com/tribute-music-prod/205_full_clap-tap_0102.mp3"
+        type="audio/mpeg"
+      />
     </audio>
     <swiper-container
       ref="swiperEl"
