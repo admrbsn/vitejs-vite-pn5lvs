@@ -8,6 +8,7 @@
       pagination="true"
       @init="onInit"
       @slidechange="onSlideChange"
+      :class="{ intro: !hasStartedPlaying }"
     >
       <!-- Video header with Tribute info and mute button -->
       <div
@@ -27,9 +28,9 @@
         <div>To: Recipient</div>
 
         <!-- Overaly for mobile interaction -->
-        <!--<div v-show="showOverlay" class="overlay">
+        <div v-show="showOverlay" class="overlay">
           <div class="tooltip">Please unmute before playing.</div>
-        </div>-->
+        </div>
 
         <!-- Mute/Unmute button -->
         <button
@@ -43,6 +44,11 @@
           />
         </button>
       </div>
+
+      <!-- Intro slide -->
+      <swiper-slide class="intro-slide">
+        <div></div>
+      </swiper-slide>
 
       <!-- Swiper slides -->
       <swiper-slide v-for="(slide, index) in slides" :key="index">
@@ -136,8 +142,11 @@ onMounted(() => {
       `
         :root {--swiper-theme-color: #fff;}
         swiper-container {height:100%;background-color:#202124;}
-        swiper-slide {display:flex;align-items:center;justify-content:center;color:#fff;}
-        .swiper-button-next,.swiper-button-prev {z-index: 9;}
+        swiper-slide {display:flex;align-items:center;justify-content:center;margin-top:-64px;color:#fff;}
+        .swiper-button-next,.swiper-button-prev {z-index:9;}
+        swiper-container.intro::part(button-prev) {display:none;}
+        swiper-container.intro::part(button-next) {position:absolute;top:50%;right:0;left:0;display:flex;align-items:center;justify-content:center;width:4rem;height:4rem;margin:auto;background-color:#fff;border-radius:99px;transform:translateY(-50%);}
+        swiper-container.intro::part(button-next):after {content:url('play.svg');width:2rem;height:2rem;margin-left:0.375rem;line-height:0;}
       `,
     ],
   };
@@ -153,20 +162,9 @@ onMounted(() => {
       var hls = new Hls();
       hls.loadSource(slide.src);
       hls.attachMedia(videoRefs.value[index]);
-      videoRefs.value[index].onended = async () => {
+      videoRefs.value[index].onended = () => {
         if (swiperEl.value && swiperEl.value.swiper) {
-          // stop the current video
-          videoRefs.value[currentPlayingIndex.value].pause();
-          videoRefs.value[currentPlayingIndex.value].currentTime = 0;
-
-          // slide to the next video
-          swiperEl.value.swiper.slideNext();
-
-          // wait until Vue updates the DOM
-          await nextTick();
-
-          // play the new current video
-          videoRefs.value[currentPlayingIndex.value].play();
+          swiperEl.value.swiper.slideNext(); // slide to the next video
         }
       };
     }
@@ -202,8 +200,7 @@ const playVideo = (video) => {
 
 const togglePlay = () => {
   if (swiperEl.value && swiperEl.value.swiper) {
-    const realIndex = swiperEl.value.swiper.realIndex;
-    const currentVideo = videoRefs.value[realIndex];
+    const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex - 1];
     if (currentVideo) {
       if (isPlaying.value) {
         currentVideo.pause();
@@ -212,7 +209,6 @@ const togglePlay = () => {
         playVideo(currentVideo);
         isPlaying.value = true;
         hasStartedPlaying.value = true;
-        currentPlayingIndex.value = realIndex; // Add this line
       }
     }
   }
@@ -220,13 +216,13 @@ const togglePlay = () => {
 
 const toggleMute = () => {
   if (swiperEl.value && swiperEl.value.swiper) {
-    const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex];
+    const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex - 1];
     if (currentVideo) {
       if (isMuted.value) {
-        currentVideo.muted = false;
+        currentVideo.muted = true;
         isMuted.value = false;
       } else {
-        currentVideo.muted = true;
+        currentVideo.muted = false;
         isMuted.value = true;
       }
       showOverlay.value = window.innerWidth < 768 && isMuted.value;
@@ -237,34 +233,30 @@ const toggleMute = () => {
 const onSlideChange = (e) => {
   console.log('slide changed');
 
-  // pause the previous video
-  if (currentPlayingIndex.value !== null) {
-    const previousVideo = videoRefs.value[currentPlayingIndex.value];
+  // pause the previous video, if it exists and isn't the intro slide
+  if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
+    const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
       previousVideo.pause();
+      previousVideo.currentTime = 0;
     }
   }
-
-  // play the current video
-  const currentVideo = videoRefs.value[e.detail[0].realIndex];
-  playVideo(currentVideo);
-  hasStartedPlaying.value = true;
 
   // update the currently playing video index
   currentPlayingIndex.value = e.detail[0].realIndex;
 
-  const currentIndex = e.detail[0].realIndex;
-  currentVideo.addEventListener('ended', function () {
-    const nextIndex = currentIndex + 1;
-    const nextVideo = videoRefs.value[nextIndex];
-    if (nextVideo) {
-      currentVideo.volume = 0;
-      playVideo(nextVideo);
+  // If it's not the intro slide
+  if (currentPlayingIndex.value !== 0) {
+    // play the current video
+    const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
+    playVideo(currentVideo);
+    hasStartedPlaying.value = true;
+
+    // Add event listener for 'ended' event
+    currentVideo.addEventListener('ended', function () {
       swiperEl.value.swiper.slideNext();
-    } else {
-      swiperEl.value.swiper.slideTo(0);
-    }
-  });
+    });
+  }
 };
 </script>
 
@@ -322,5 +314,10 @@ iframe {
 .hide-unless-hovered:hover,
 swiper-slide > video:hover + .hide-unless-hovered {
   opacity: 1;
+}
+.intro-slide div {
+  width: 600px;
+  height: 338.02px;
+  background-color: #76cdbe;
 }
 </style>
