@@ -123,6 +123,7 @@ const currentPlayingIndex = ref(null);
 const isPlaying = ref(false);
 const isMuted = ref(true);
 const hasStartedPlaying = ref(false);
+const endedHandlers = ref([]);
 const slides = [
   {
     src: 'https://player.vimeo.com/external/823050002.m3u8?s=3f3e42fa89c4193ccc3e30707faf593eccbb9696',
@@ -244,7 +245,16 @@ const onSlideChange = (e) => {
   if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
-      hlsInstances.value[currentPlayingIndex.value - 1].detachMedia(); // detach Hls
+      previousVideo.pause();
+      isPlaying.value = false;
+
+      // Remove the 'ended' event listener for this video
+      if (endedHandlers.value[currentPlayingIndex.value - 1]) {
+        previousVideo.removeEventListener(
+          'ended',
+          endedHandlers.value[currentPlayingIndex.value - 1]
+        );
+      }
     }
   }
 
@@ -255,15 +265,25 @@ const onSlideChange = (e) => {
   if (currentPlayingIndex.value !== 0) {
     // play the current video
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
-    hlsInstances.value[currentPlayingIndex.value - 1].attachMedia(currentVideo); // attach Hls
+    if (
+      currentVideo &&
+      hlsInstances.value[currentPlayingIndex.value - 1].media !== currentVideo
+    ) {
+      hlsInstances.value[currentPlayingIndex.value - 1].attachMedia(
+        currentVideo
+      ); // attach Hls only if it's not already attached
+    }
     playVideo(currentVideo);
     hasStartedPlaying.value = true;
     isPlaying.value = true;
 
     // Add event listener for 'ended' event
-    currentVideo.addEventListener('ended', function () {
+    const handler = function () {
       swiperEl.value.swiper.slideNext();
-    });
+      currentVideo.currentTime = 0; // Add this line
+    };
+    endedHandlers.value[currentPlayingIndex.value - 1] = handler; // Store this handler
+    currentVideo.addEventListener('ended', handler);
   }
 };
 </script>
