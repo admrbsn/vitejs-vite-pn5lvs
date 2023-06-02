@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vimeo/player": "^2.19.0",
+    "hls.js": "^1.4.4",
     "swiper": "^9.2.4",
     "vue": "^3.2.47"
   },
