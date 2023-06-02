@@ -27,9 +27,9 @@
         <div>To: Recipient</div>
 
         <!-- Overaly for mobile interaction -->
-        <div v-show="showOverlay" class="overlay">
+        <!--<div v-show="showOverlay" class="overlay">
           <div class="tooltip">Please unmute before playing.</div>
-        </div>
+        </div>-->
 
         <!-- Mute/Unmute button -->
         <button
