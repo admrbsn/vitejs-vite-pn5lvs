@@ -144,6 +144,7 @@ onMounted(() => {
         swiper-container.intro::part(button-prev) {display:none;}
         swiper-container.intro::part(button-next) {position:absolute;top:50%;right:0;left:0;display:flex;align-items:center;justify-content:center;width:4rem;height:4rem;margin:auto;background-color:#fff;border-radius:99px;transform:translateY(-50%);}
         swiper-container.intro::part(button-next):after {content:url('play.svg');width:2rem;height:2rem;margin-left:0.375rem;line-height:0;}
+        swiper-container::part(pagination) {display:none;}
       `,
     ],
   };
