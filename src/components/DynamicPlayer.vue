@@ -302,7 +302,7 @@ iframe {
   display: none !important;
 }
 .dynamic-player {
-  height: 100vh;
+  min-height: -webkit-fill-available;
 }
 .overlay {
   position: fixed;
