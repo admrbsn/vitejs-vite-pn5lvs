@@ -213,13 +213,13 @@ const togglePlay = () => {
 
 const toggleMute = () => {
   if (swiperEl.value && swiperEl.value.swiper) {
-    const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex - 1];
+    const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex];
     if (currentVideo) {
       if (isMuted.value) {
-        currentVideo.muted = true;
+        currentVideo.muted = false; // unmute
         isMuted.value = false;
       } else {
-        currentVideo.muted = false;
+        currentVideo.muted = true; // mute
         isMuted.value = true;
       }
       showOverlay.value = window.innerWidth < 768 && isMuted.value;
