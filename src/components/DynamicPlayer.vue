@@ -123,7 +123,6 @@ const currentPlayingIndex = ref(null);
 const isPlaying = ref(false);
 const isMuted = ref(true);
 const hasStartedPlaying = ref(false);
-const endedHandlers = ref([]);
 const slides = [
   {
     src: 'https://player.vimeo.com/external/823050002.m3u8?s=3f3e42fa89c4193ccc3e30707faf593eccbb9696',
