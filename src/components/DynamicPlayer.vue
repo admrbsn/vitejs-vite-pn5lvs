@@ -191,21 +191,16 @@ const onInit = (e) => {
 
 const playVideo = (video) => {
   if (video) {
-    video.muted = true; // Add this line
-    video
-      .play()
-      .then(() => {
-        video.muted = isMuted.value; // After autoplay starts, set the muted state according to the user's setting
-      })
-      .catch((error) => {
-        if (
-          error.name === 'NotAllowedError' ||
-          error.name === 'NotSupportedError'
-        ) {
-          video.setVolume(0);
-          video.play();
-        }
-      });
+    //video.setVolume(isMuted.value ? 0 : 1);
+    video.play().catch((error) => {
+      if (
+        error.name === 'NotAllowedError' ||
+        error.name === 'NotSupportedError'
+      ) {
+        video.setVolume(0);
+        video.play();
+      }
+    });
   }
 };
 
