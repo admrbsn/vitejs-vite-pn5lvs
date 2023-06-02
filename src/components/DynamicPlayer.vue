@@ -276,7 +276,7 @@ const onSlideChange = (e) => {
     // Add event listener for 'ended' event
     const handler = function () {
       swiperEl.value.swiper.slideNext();
-      currentVideo.currentTime = 0; // Add this line
+      //currentVideo.currentTime = 0; // Add this line
     };
     endedHandlers.value[currentPlayingIndex.value - 1] = handler; // Store this handler
     currentVideo.addEventListener('ended', handler);
