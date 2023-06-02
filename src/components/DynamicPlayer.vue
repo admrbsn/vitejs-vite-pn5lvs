@@ -2,10 +2,7 @@
   <div class="dynamic-player">
     <swiper-container
       ref="swiperEl"
-      noSwiping
       init="false"
-      navigation="true"
-      pagination="true"
       @init="onInit"
       @slidechange="onSlideChange"
       :class="{ intro: !hasStartedPlaying }"
@@ -121,16 +118,21 @@ const volumeOffImage = ref('volume-off.svg');
 // Ref for swiper element
 const swiperEl = ref(null);
 const videoRefs = ref([]);
+const hlsInstances = ref([]);
 const currentPlayingIndex = ref(null);
 const isPlaying = ref(false);
 const isMuted = ref(true);
 const hasStartedPlaying = ref(false);
+const endedHandlers = ref([]);
 const slides = [
   {
     src: 'https://player.vimeo.com/external/823050002.m3u8?s=3f3e42fa89c4193ccc3e30707faf593eccbb9696',
   },
   {
     src: 'https://player.vimeo.com/external/832639348.m3u8?s=3f11e4fe435908857eb79bc44a44ddcd16a5733e',
+  },
+  {
+    src: 'https://player.vimeo.com/external/832639376.m3u8?s=2d8046d016c0c46c925f64d4c1e61bc148dacd46',
   },
 ];
 
@@ -144,6 +146,10 @@ onMounted(() => {
   // Swiper parameters
   const swiperParams = {
     autoplay: false,
+    navigation: true,
+    pagination: {
+      type: 'progressbar',
+    },
     injectStyles: [
       `
         :root {--swiper-theme-color: #fff;}
@@ -153,7 +159,6 @@ onMounted(() => {
         swiper-container.intro::part(button-prev) {display:none;}
         swiper-container.intro::part(button-next) {position:absolute;top:50%;right:0;left:0;display:flex;align-items:center;justify-content:center;width:4rem;height:4rem;margin:auto;background-color:#fff;border-radius:99px;transform:translateY(-50%);}
         swiper-container.intro::part(button-next):after {content:url('play.svg');width:2rem;height:2rem;margin-left:0.375rem;line-height:0;}
-        swiper-container::part(pagination) {display:none;}
       `,
     ],
   };
@@ -162,18 +167,12 @@ onMounted(() => {
   Object.assign(swiperEl.value, swiperParams);
   swiperEl.value.initialize();
 
-  // Iterate over slides
+  // Initialize all Hls instances, but do not attach media yet
   slides.forEach((slide, index) => {
-    // HLS
     if (Hls.isSupported()) {
       var hls = new Hls();
       hls.loadSource(slide.src);
-      hls.attachMedia(videoRefs.value[index]);
-      videoRefs.value[index].onended = () => {
-        if (swiperEl.value && swiperEl.value.swiper) {
-          swiperEl.value.swiper.slideNext(); // slide to the next video
-        }
-      };
+      hlsInstances.value[index] = hls;
     }
   });
 });
@@ -192,16 +191,21 @@ const onInit = (e) => {
 
 const playVideo = (video) => {
   if (video) {
-    //video.setVolume(isMuted.value ? 0 : 1);
-    video.play().catch((error) => {
-      if (
-        error.name === 'NotAllowedError' ||
-        error.name === 'NotSupportedError'
-      ) {
-        video.setVolume(0);
-        video.play();
-      }
-    });
+    video.muted = true; // Add this line
+    video
+      .play()
+      .then(() => {
+        video.muted = isMuted.value; // After autoplay starts, set the muted state according to the user's setting
+      })
+      .catch((error) => {
+        if (
+          error.name === 'NotAllowedError' ||
+          error.name === 'NotSupportedError'
+        ) {
+          video.setVolume(0);
+          video.play();
+        }
+      });
   }
 };
 
@@ -247,7 +251,15 @@ const onSlideChange = (e) => {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
       previousVideo.pause();
-      previousVideo.currentTime = 0;
+      isPlaying.value = false;
+
+      // Remove the 'ended' event listener for this video
+      if (endedHandlers.value[currentPlayingIndex.value - 1]) {
+        previousVideo.removeEventListener(
+          'ended',
+          endedHandlers.value[currentPlayingIndex.value - 1]
+        );
+      }
     }
   }
 
@@ -258,14 +270,25 @@ const onSlideChange = (e) => {
   if (currentPlayingIndex.value !== 0) {
     // play the current video
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
+    if (
+      currentVideo &&
+      hlsInstances.value[currentPlayingIndex.value - 1].media !== currentVideo
+    ) {
+      hlsInstances.value[currentPlayingIndex.value - 1].attachMedia(
+        currentVideo
+      ); // attach Hls only if it's not already attached
+    }
     playVideo(currentVideo);
     hasStartedPlaying.value = true;
     isPlaying.value = true;
 
     // Add event listener for 'ended' event
-    currentVideo.addEventListener('ended', function () {
+    const handler = function () {
       swiperEl.value.swiper.slideNext();
-    });
+      currentVideo.currentTime = 0; // Add this line
+    };
+    endedHandlers.value[currentPlayingIndex.value - 1] = handler; // Store this handler
+    currentVideo.addEventListener('ended', handler);
   }
 };
 </script>
