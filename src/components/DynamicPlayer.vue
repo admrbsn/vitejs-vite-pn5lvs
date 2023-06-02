@@ -4,8 +4,6 @@
       ref="swiperEl"
       noSwiping
       init="false"
-      navigation="true"
-      pagination="true"
       @init="onInit"
       @slidechange="onSlideChange"
       :class="{ intro: !hasStartedPlaying }"
@@ -121,16 +119,21 @@ const volumeOffImage = ref('volume-off.svg');
 // Ref for swiper element
 const swiperEl = ref(null);
 const videoRefs = ref([]);
+const hlsInstances = ref([]);
 const currentPlayingIndex = ref(null);
 const isPlaying = ref(false);
 const isMuted = ref(true);
 const hasStartedPlaying = ref(false);
+const endedHandlers = ref([]);
 const slides = [
   {
     src: 'https://player.vimeo.com/external/823050002.m3u8?s=3f3e42fa89c4193ccc3e30707faf593eccbb9696',
   },
   {
     src: 'https://player.vimeo.com/external/832639348.m3u8?s=3f11e4fe435908857eb79bc44a44ddcd16a5733e',
+  },
+  {
+    src: 'https://player.vimeo.com/external/832639376.m3u8?s=2d8046d016c0c46c925f64d4c1e61bc148dacd46',
   },
 ];
 
@@ -144,6 +147,10 @@ onMounted(() => {
   // Swiper parameters
   const swiperParams = {
     autoplay: false,
+    navigation: true,
+    pagination: {
+      type: 'progressbar',
+    },
     injectStyles: [
       `
         :root {--swiper-theme-color: #fff;}
@@ -153,7 +160,6 @@ onMounted(() => {
         swiper-container.intro::part(button-prev) {display:none;}
         swiper-container.intro::part(button-next) {position:absolute;top:50%;right:0;left:0;display:flex;align-items:center;justify-content:center;width:4rem;height:4rem;margin:auto;background-color:#fff;border-radius:99px;transform:translateY(-50%);}
         swiper-container.intro::part(button-next):after {content:url('play.svg');width:2rem;height:2rem;margin-left:0.375rem;line-height:0;}
-        swiper-container::part(pagination) {display:none;}
       `,
     ],
   };
