@@ -153,9 +153,20 @@ onMounted(() => {
       var hls = new Hls();
       hls.loadSource(slide.src);
       hls.attachMedia(videoRefs.value[index]);
-      videoRefs.value[index].onended = () => {
+      videoRefs.value[index].onended = async () => {
         if (swiperEl.value && swiperEl.value.swiper) {
-          swiperEl.value.swiper.slideNext(); // slide to the next video
+          // stop the current video
+          videoRefs.value[currentPlayingIndex.value].pause();
+          videoRefs.value[currentPlayingIndex.value].currentTime = 0;
+
+          // slide to the next video
+          swiperEl.value.swiper.slideNext();
+
+          // wait until Vue updates the DOM
+          await nextTick();
+
+          // play the new current video
+          videoRefs.value[currentPlayingIndex.value].play();
         }
       };
     }
