@@ -27,6 +27,7 @@
       >
         <!-- Tribute info -->
         <div>To: Recipient</div>
+        isPlaying: {{ isPlaying }}
 
         <!-- Overaly for mobile interaction -->
         <div v-show="showOverlay" class="overlay">
@@ -252,6 +253,7 @@ const onSlideChange = (e) => {
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
     playVideo(currentVideo);
     hasStartedPlaying.value = true;
+    isPlaying.value = true;
 
     // Add event listener for 'ended' event
     currentVideo.addEventListener('ended', function () {
