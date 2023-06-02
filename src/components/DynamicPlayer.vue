@@ -168,18 +168,12 @@ onMounted(() => {
   Object.assign(swiperEl.value, swiperParams);
   swiperEl.value.initialize();
 
-  // Iterate over slides
+  // Initialize all Hls instances, but do not attach media yet
   slides.forEach((slide, index) => {
-    // HLS
     if (Hls.isSupported()) {
       var hls = new Hls();
       hls.loadSource(slide.src);
-      hls.attachMedia(videoRefs.value[index]);
-      videoRefs.value[index].onended = () => {
-        if (swiperEl.value && swiperEl.value.swiper) {
-          swiperEl.value.swiper.slideNext(); // slide to the next video
-        }
-      };
+      hlsInstances.value[index] = hls;
     }
   });
 });
@@ -247,31 +241,45 @@ const toggleMute = () => {
 
 const onSlideChange = (e) => {
   console.log('slide changed');
-
   // pause the previous video, if it exists and isn't the intro slide
   if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
       previousVideo.pause();
-      previousVideo.currentTime = 0;
+      isPlaying.value = false;
+      // Remove the 'ended' event listener for this video
+      if (endedHandlers.value[currentPlayingIndex.value - 1]) {
+        previousVideo.removeEventListener(
+          'ended',
+          endedHandlers.value[currentPlayingIndex.value - 1]
+        );
+      }
     }
   }
-
   // update the currently playing video index
   currentPlayingIndex.value = e.detail[0].realIndex;
-
   // If it's not the intro slide
   if (currentPlayingIndex.value !== 0) {
     // play the current video
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
+    if (
+      currentVideo &&
+      hlsInstances.value[currentPlayingIndex.value - 1].media !== currentVideo
+    ) {
+      hlsInstances.value[currentPlayingIndex.value - 1].attachMedia(
+        currentVideo
+      ); // attach Hls only if it's not already attached
+    }
     playVideo(currentVideo);
     hasStartedPlaying.value = true;
     isPlaying.value = true;
-
     // Add event listener for 'ended' event
-    currentVideo.addEventListener('ended', function () {
+    const handler = function () {
       swiperEl.value.swiper.slideNext();
-    });
+      currentVideo.currentTime = 0; // Add this line
+    };
+    endedHandlers.value[currentPlayingIndex.value - 1] = handler; // Store this handler
+    currentVideo.addEventListener('ended', handler);
   }
 };
 </script>
