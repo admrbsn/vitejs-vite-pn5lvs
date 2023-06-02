@@ -29,12 +29,12 @@
         <div>To: Recipient</div>
 
         <!-- Overaly for mobile interaction -->
-        <div v-show="showOverlay" class="overlay">
+        <!--<div v-show="showOverlay" class="overlay">
           <div class="tooltip">Please unmute before playing.</div>
-        </div>
+        </div>-->
 
         <!-- Mute/Unmute button -->
-        <button
+        <!--<button
           @click="toggleMute"
           class="flex items-center justify-center z-10"
         >
@@ -43,7 +43,7 @@
             class="w-6 h-6"
             alt="Mute/Unmute Button"
           />
-        </button>
+        </button>-->
       </div>
 
       <!-- Intro slide -->
@@ -53,13 +53,21 @@
 
       <!-- Swiper slides -->
       <swiper-slide v-for="(slide, index) in slides" :key="index">
-        <video
+        <!--<video
           ref="videoRefs"
           width="600"
           height="400"
           playsinline
           autobuffer
           :muted="isMuted"
+          :id="'video-' + index"
+        >-->
+        <video
+          ref="videoRefs"
+          width="600"
+          height="400"
+          playsinline
+          autobuffer
           :id="'video-' + index"
         >
           <source :src="slide.src" type="application/x-mpegURL" />
