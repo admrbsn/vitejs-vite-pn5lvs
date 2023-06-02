@@ -215,17 +215,19 @@ const togglePlay = () => {
 
 const toggleMute = () => {
   if (swiperEl.value && swiperEl.value.swiper) {
-    const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex];
-    if (currentVideo) {
-      if (isMuted.value) {
-        currentVideo.muted = false; // unmute
-        isMuted.value = false;
-      } else {
-        currentVideo.muted = true; // mute
-        isMuted.value = true;
-      }
-      showOverlay.value = window.innerWidth < 768 && isMuted.value;
+    //const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex];
+    //if (currentVideo) {
+    if (isMuted.value) {
+      console.log('asfsafsa');
+      //currentVideo.muted = false; // unmute
+      isMuted.value = false;
+    } else {
+      console.log('dddd');
+      //currentVideo.muted = true; // mute
+      isMuted.value = true;
     }
+    showOverlay.value = window.innerWidth < 768 && isMuted.value;
+    //}
   }
 };
 
