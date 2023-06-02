@@ -14,7 +14,8 @@
       <div
         slot="container-start"
         class="
-          relative
+          fixed
+          w-full
           z-10
           flex
           items-center
@@ -139,7 +140,7 @@ onMounted(() => {
       `
         :root {--swiper-theme-color: #fff;}
         swiper-container {height:100%;background-color:#202124;}
-        swiper-slide {display:flex;align-items:center;justify-content:center;margin-top:-64px;color:#fff;}
+        swiper-slide {display:flex;align-items:center;justify-content:center;color:#fff;}
         .swiper-button-next,.swiper-button-prev {z-index:9;}
         swiper-container.intro::part(button-prev) {display:none;}
         swiper-container.intro::part(button-next) {position:absolute;top:50%;right:0;left:0;display:flex;align-items:center;justify-content:center;width:4rem;height:4rem;margin:auto;background-color:#fff;border-radius:99px;transform:translateY(-50%);}
