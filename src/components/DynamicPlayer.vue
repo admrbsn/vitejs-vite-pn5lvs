@@ -50,15 +50,6 @@
 
       <!-- Swiper slides -->
       <swiper-slide v-for="(slide, index) in slides" :key="index">
-        <!--<video
-          ref="videoRefs"
-          width="600"
-          height="400"
-          playsinline
-          autobuffer
-          :muted="isMuted"
-          :id="'video-' + index"
-        >-->
         <video
           ref="videoRefs"
           width="600"
@@ -101,24 +92,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { register } from 'swiper/element/bundle';
 import Hls from 'hls.js';
 register();
 
-// Mobile unmute helper
 const showOverlay = ref(false);
-
-// Ref for images
 const playImage = ref('play.svg');
 const pauseImage = ref('pause.svg');
 const volumeOnImage = ref('volume-on.svg');
 const volumeOffImage = ref('volume-off.svg');
-
-// Ref for swiper element
 const swiperEl = ref(null);
 const videoRefs = ref([]);
-const hlsInstances = ref([]);
 const currentPlayingIndex = ref(null);
 const isPlaying = ref(false);
 const isMuted = ref(true);
@@ -137,13 +122,11 @@ const slides = [
 ];
 
 onMounted(() => {
-  // Show tooltip helper to unmute on mobile
   showOverlay.value = window.innerWidth < 768 && isMuted.value;
   window.addEventListener('resize', () => {
     showOverlay.value = window.innerWidth < 768 && isMuted.value;
   });
 
-  // Swiper parameters
   const swiperParams = {
     autoplay: false,
     navigation: true,
@@ -163,35 +146,35 @@ onMounted(() => {
     ],
   };
 
-  // Assign all parameters to Swiper element and initialize it
   Object.assign(swiperEl.value, swiperParams);
   swiperEl.value.initialize();
 
-  // Initialize all Hls instances, but do not attach media yet
   slides.forEach((slide, index) => {
     if (Hls.isSupported()) {
       var hls = new Hls();
       hls.loadSource(slide.src);
-      hlsInstances.value[index] = hls;
+      hls.attachMedia(videoRefs.value[index]);
+      videoRefs.value[index].onended = () => {
+        if (swiperEl.value && swiperEl.value.swiper) {
+          swiperEl.value.swiper.slideNext();
+        }
+      };
     }
   });
 });
 
 onUnmounted(() => {
-  // Remove event listener when component is unmounted to avoid memory leaks
   window.removeEventListener('resize', () => {
     showOverlay.value = window.innerWidth < 768 && isMuted.value;
   });
 });
 
-// Methods
 const onInit = (e) => {
   console.log('swiper initialized');
 };
 
 const playVideo = (video) => {
   if (video) {
-    //video.setVolume(isMuted.value ? 0 : 1);
     video.play().catch((error) => {
       if (
         error.name === 'NotAllowedError' ||
@@ -222,67 +205,36 @@ const togglePlay = () => {
 
 const toggleMute = () => {
   if (swiperEl.value && swiperEl.value.swiper) {
-    //const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex];
-    //if (currentVideo) {
     if (isMuted.value) {
-      console.log('asfsafsa');
-      //currentVideo.muted = false; // unmute
       isMuted.value = false;
     } else {
-      console.log('dddd');
-      //currentVideo.muted = true; // mute
       isMuted.value = true;
     }
     showOverlay.value = window.innerWidth < 768 && isMuted.value;
-    //}
   }
 };
 
 const onSlideChange = (e) => {
-  console.log('slide changed');
-
-  // pause the previous video, if it exists and isn't the intro slide
   if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
       previousVideo.pause();
-      isPlaying.value = false;
-
-      // Remove the 'ended' event listener for this video
-      if (endedHandlers.value[currentPlayingIndex.value - 1]) {
-        previousVideo.removeEventListener(
-          'ended',
-          endedHandlers.value[currentPlayingIndex.value - 1]
-        );
-      }
+      previousVideo.currentTime = 0;
     }
   }
 
-  // update the currently playing video index
   currentPlayingIndex.value = e.detail[0].realIndex;
 
-  // If it's not the intro slide
   if (currentPlayingIndex.value !== 0) {
-    // play the current video
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
-    if (
-      currentVideo &&
-      hlsInstances.value[currentPlayingIndex.value - 1].media !== currentVideo
-    ) {
-      hlsInstances.value[currentPlayingIndex.value - 1].attachMedia(
-        currentVideo
-      ); // attach Hls only if it's not already attached
-    }
     playVideo(currentVideo);
     hasStartedPlaying.value = true;
     isPlaying.value = true;
 
-    // Add event listener for 'ended' event
     const handler = function () {
       swiperEl.value.swiper.slideNext();
-      currentVideo.currentTime = 0; // Add this line
     };
-    endedHandlers.value[currentPlayingIndex.value - 1] = handler; // Store this handler
+    endedHandlers.value[currentPlayingIndex.value - 1] = handler;
     currentVideo.addEventListener('ended', handler);
   }
 };
