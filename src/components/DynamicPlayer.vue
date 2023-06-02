@@ -26,12 +26,12 @@
         <div>To: Recipient</div>
 
         <!-- Overaly for mobile interaction -->
-        <!--<div v-show="showOverlay" class="overlay">
+        <div v-show="showOverlay" class="overlay">
           <div class="tooltip">Please unmute before playing.</div>
-        </div>-->
+        </div>
 
         <!-- Mute/Unmute button -->
-        <!--<button
+        <button
           @click="toggleMute"
           class="flex items-center justify-center z-10"
         >
@@ -40,7 +40,7 @@
             class="w-6 h-6"
             alt="Mute/Unmute Button"
           />
-        </button>-->
+        </button>
       </div>
 
       <!-- Intro slide -->
@@ -56,6 +56,8 @@
           height="400"
           playsinline
           autobuffer
+          :muted="isMuted"
+          preload="auto"
           :id="'video-' + index"
         >
           <source :src="slide.src" type="application/x-mpegURL" />
