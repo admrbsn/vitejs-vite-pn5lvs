@@ -245,16 +245,7 @@ const onSlideChange = (e) => {
   if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
-      previousVideo.pause();
-      isPlaying.value = false;
-
-      // Remove the 'ended' event listener for this video
-      if (endedHandlers.value[currentPlayingIndex.value - 1]) {
-        previousVideo.removeEventListener(
-          'ended',
-          endedHandlers.value[currentPlayingIndex.value - 1]
-        );
-      }
+      hlsInstances.value[currentPlayingIndex.value - 1].detachMedia(); // detach Hls
     }
   }
 
@@ -265,25 +256,15 @@ const onSlideChange = (e) => {
   if (currentPlayingIndex.value !== 0) {
     // play the current video
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
-    if (
-      currentVideo &&
-      hlsInstances.value[currentPlayingIndex.value - 1].media !== currentVideo
-    ) {
-      hlsInstances.value[currentPlayingIndex.value - 1].attachMedia(
-        currentVideo
-      ); // attach Hls only if it's not already attached
-    }
+    hlsInstances.value[currentPlayingIndex.value - 1].attachMedia(currentVideo); // attach Hls
     playVideo(currentVideo);
     hasStartedPlaying.value = true;
     isPlaying.value = true;
 
     // Add event listener for 'ended' event
-    const handler = function () {
+    currentVideo.addEventListener('ended', function () {
       swiperEl.value.swiper.slideNext();
-      currentVideo.currentTime = 0; // Add this line
-    };
-    endedHandlers.value[currentPlayingIndex.value - 1] = handler; // Store this handler
-    currentVideo.addEventListener('ended', handler);
+    });
   }
 };
 </script>
