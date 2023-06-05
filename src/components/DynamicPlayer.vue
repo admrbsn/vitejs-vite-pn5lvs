@@ -62,6 +62,7 @@
         >
           <source :src="slide.src" type="application/x-mpegURL" />
         </video>
+        <!-- Play/pause button -->
         <button
           @click="togglePlay"
           :class="{ 'hide-unless-hovered': hasStartedPlaying }"
@@ -94,11 +95,13 @@
 </template>
 
 <script setup>
+// Imports
 import { ref, onMounted, onUnmounted } from 'vue';
 import { register } from 'swiper/element/bundle';
 import Hls from 'hls.js';
 register();
 
+// All of our reactive data
 const showOverlay = ref(false);
 const playImage = ref('play.svg');
 const pauseImage = ref('pause.svg');
@@ -111,9 +114,14 @@ const isPlaying = ref(false);
 const isMuted = ref(true);
 const hasStartedPlaying = ref(false);
 const endedHandlers = ref([]);
+
+// Video slides
 const slides = [
   {
     src: 'https://player.vimeo.com/external/823050002.m3u8?s=3f3e42fa89c4193ccc3e30707faf593eccbb9696',
+  },
+  {
+    src: 'https://player.vimeo.com/external/759635579.m3u8?s=219ffe87caf9351cae8dad3c45c00f656ef35ad8',
   },
   {
     src: 'https://player.vimeo.com/external/832639348.m3u8?s=3f11e4fe435908857eb79bc44a44ddcd16a5733e',
@@ -123,6 +131,7 @@ const slides = [
   },
 ];
 
+// Mounted
 onMounted(() => {
   showOverlay.value = window.innerWidth < 768 && isMuted.value;
   window.addEventListener('resize', () => {
@@ -151,6 +160,7 @@ onMounted(() => {
   Object.assign(swiperEl.value, swiperParams);
   swiperEl.value.initialize();
 
+  // Attach Hls.js to each video
   slides.forEach((slide, index) => {
     if (Hls.isSupported()) {
       var hls = new Hls();
@@ -165,16 +175,19 @@ onMounted(() => {
   });
 });
 
+// To avoid memory leaks
 onUnmounted(() => {
   window.removeEventListener('resize', () => {
     showOverlay.value = window.innerWidth < 768 && isMuted.value;
   });
 });
 
+// Init swiper
 const onInit = (e) => {
   console.log('swiper initialized');
 };
 
+// Play each video
 const playVideo = (video) => {
   if (video) {
     video.play().catch((error) => {
@@ -189,9 +202,13 @@ const playVideo = (video) => {
   }
 };
 
+// Toggle play/pause buttons
 const togglePlay = () => {
   if (swiperEl.value && swiperEl.value.swiper) {
-    const currentVideo = videoRefs.value[swiperEl.value.swiper.realIndex - 1];
+    const currentVideo =
+      swiperEl.value.swiper.realIndex > 0
+        ? videoRefs.value[swiperEl.value.swiper.realIndex - 1]
+        : null;
     if (currentVideo) {
       if (isPlaying.value) {
         currentVideo.pause();
@@ -205,6 +222,7 @@ const togglePlay = () => {
   }
 };
 
+// Toggle mute/unmute buttons
 const toggleMute = () => {
   if (swiperEl.value && swiperEl.value.swiper) {
     if (isMuted.value) {
@@ -216,28 +234,40 @@ const toggleMute = () => {
   }
 };
 
+// Handle slide changing
 const onSlideChange = (e) => {
+  // Pause and reset the time of previous video if any
   if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
       previousVideo.pause();
       previousVideo.currentTime = 0;
+      const previousHandler =
+        endedHandlers.value[currentPlayingIndex.value - 1];
+      if (previousHandler) {
+        previousVideo.removeEventListener('ended', previousHandler);
+      }
     }
   }
 
+  // Assign current video to real index value from Swiper
   currentPlayingIndex.value = e.detail[0].realIndex;
 
-  if (currentPlayingIndex.value !== 0) {
+  // Check if it's not the intro slide
+  if (currentPlayingIndex.value > 0) {
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
-    playVideo(currentVideo);
-    hasStartedPlaying.value = true;
-    isPlaying.value = true;
+    if (currentVideo) {
+      playVideo(currentVideo);
+      hasStartedPlaying.value = true;
+      isPlaying.value = true;
 
-    const handler = function () {
-      swiperEl.value.swiper.slideNext();
-    };
-    endedHandlers.value[currentPlayingIndex.value - 1] = handler;
-    currentVideo.addEventListener('ended', handler);
+      // Remove previous handler and add new one
+      const handler = function () {
+        swiperEl.value.swiper.slideNext();
+      };
+      endedHandlers.value[currentPlayingIndex.value - 1] = handler;
+      currentVideo.addEventListener('ended', handler);
+    }
   }
 };
 </script>
