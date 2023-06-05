@@ -50,8 +50,14 @@
 
       <!-- Swiper slides -->
       <swiper-slide v-for="(slide, index) in slides" :key="index">
+        <div v-if="slide.type === 'html'" v-html="slide.content"></div>
         <video
-          ref="videoRefs"
+          v-else-if="slide.type === 'video'"
+          :ref="
+            (el) => {
+              videoRefs[index] = el;
+            }
+          "
           width="600"
           height="400"
           playsinline
@@ -108,28 +114,39 @@ const pauseImage = ref('pause.svg');
 const volumeOnImage = ref('volume-on.svg');
 const volumeOffImage = ref('volume-off.svg');
 const swiperEl = ref(null);
-const videoRefs = ref([]);
 const currentPlayingIndex = ref(null);
 const isPlaying = ref(false);
 const isMuted = ref(true);
 const hasStartedPlaying = ref(false);
+const htmlSlideTimeout = ref(null);
 const endedHandlers = ref([]);
 
 // Video slides
 const slides = [
   {
+    type: 'video',
     src: 'https://player.vimeo.com/external/823050002.m3u8?s=3f3e42fa89c4193ccc3e30707faf593eccbb9696',
   },
   {
+    type: 'video',
     src: 'https://player.vimeo.com/external/759635579.m3u8?s=219ffe87caf9351cae8dad3c45c00f656ef35ad8',
   },
   {
+    type: 'html',
+    content: '<div>Title slide</div>',
+    duration: 5000,
+  },
+  {
+    type: 'video',
     src: 'https://player.vimeo.com/external/832639348.m3u8?s=3f11e4fe435908857eb79bc44a44ddcd16a5733e',
   },
   {
+    type: 'video',
     src: 'https://player.vimeo.com/external/832639376.m3u8?s=2d8046d016c0c46c925f64d4c1e61bc148dacd46',
   },
 ];
+// Define videoRefs as an array of refs initially filled with null
+const videoRefs = ref(slides.map(() => null));
 
 // Mounted
 onMounted(() => {
@@ -168,7 +185,7 @@ onMounted(() => {
 
   // Attach Hls.js to each video
   slides.forEach((slide, index) => {
-    if (Hls.isSupported()) {
+    if (slide.type === 'video' && Hls.isSupported() && videoRefs.value[index]) {
       var hls = new Hls();
       hls.loadSource(slide.src);
       hls.attachMedia(videoRefs.value[index]);
@@ -245,6 +262,12 @@ const toggleMute = () => {
 
 // Handle slide changing
 const onSlideChange = (e) => {
+  // Clear any existing HTML slide timeout
+  if (htmlSlideTimeout.value) {
+    clearTimeout(htmlSlideTimeout.value);
+    htmlSlideTimeout.value = null;
+  }
+
   // Pause and reset the time of previous video if any
   if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
@@ -264,18 +287,26 @@ const onSlideChange = (e) => {
 
   // Check if it's not the intro slide
   if (currentPlayingIndex.value > 0) {
-    const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
-    if (currentVideo) {
-      playVideo(currentVideo);
-      hasStartedPlaying.value = true;
-      isPlaying.value = true;
-
-      // Remove previous handler and add new one
-      const handler = function () {
+    const slide = slides[currentPlayingIndex.value - 1];
+    if (slide.type === 'html') {
+      // If it's an HTML slide, wait for the duration and then advance to next slide
+      htmlSlideTimeout.value = setTimeout(() => {
         swiperEl.value.swiper.slideNext();
-      };
-      endedHandlers.value[currentPlayingIndex.value - 1] = handler;
-      currentVideo.addEventListener('ended', handler);
+      }, slide.duration);
+    } else if (slide.type === 'video') {
+      const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
+      if (currentVideo) {
+        playVideo(currentVideo);
+        hasStartedPlaying.value = true;
+        isPlaying.value = true;
+
+        // Remove previous handler and add new one
+        const handler = function () {
+          swiperEl.value.swiper.slideNext();
+        };
+        endedHandlers.value[currentPlayingIndex.value - 1] = handler;
+        currentVideo.addEventListener('ended', handler);
+      }
     }
   }
 };
