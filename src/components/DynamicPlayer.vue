@@ -245,41 +245,37 @@ const toggleMute = () => {
 
 // Handle slide changing
 const onSlideChange = (e) => {
+  // Pause and reset the time of previous video if any
   if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
       previousVideo.pause();
       previousVideo.currentTime = 0;
+      const previousHandler =
+        endedHandlers.value[currentPlayingIndex.value - 1];
+      if (previousHandler) {
+        previousVideo.removeEventListener('ended', previousHandler);
+      }
     }
   }
 
+  // Assign current video to real index value from Swiper
   currentPlayingIndex.value = e.detail[0].realIndex;
 
-  if (currentPlayingIndex.value !== 0) {
+  // Check if it's not the intro slide
+  if (currentPlayingIndex.value > 0) {
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
-    playVideo(currentVideo);
-    hasStartedPlaying.value = true;
-    isPlaying.value = true;
+    if (currentVideo) {
+      playVideo(currentVideo);
+      hasStartedPlaying.value = true;
+      isPlaying.value = true;
 
-    const handler = function () {
-      swiperEl.value.swiper.slideNext();
-    };
-    endedHandlers.value[currentPlayingIndex.value - 1] = handler;
-    currentVideo.addEventListener('ended', handler);
-  }
-
-  // Preload the next video.
-  if (currentPlayingIndex.value < videoRefs.value.length - 1) {
-    const nextVideo = videoRefs.value[currentPlayingIndex.value];
-    if (nextVideo) {
-      const videoSource = nextVideo.getElementsByTagName('source')[0];
-      if (videoSource && videoSource.src) {
-        const image = new Image();
-        image.src = videoSource.src;
-        console.log(
-          `Started preloading video at index ${currentPlayingIndex.value}`
-        );
-      }
+      // Remove previous handler and add new one
+      const handler = function () {
+        swiperEl.value.swiper.slideNext();
+      };
+      endedHandlers.value[currentPlayingIndex.value - 1] = handler;
+      currentVideo.addEventListener('ended', handler);
     }
   }
 };
