@@ -204,7 +204,7 @@ const playVideo = (video) => {
         error.name === 'NotAllowedError' ||
         error.name === 'NotSupportedError'
       ) {
-        video.setVolume(0);
+        video.volume = 0;
         video.play();
       }
     });
@@ -250,10 +250,6 @@ const onSlideChange = (e) => {
     if (previousVideo) {
       previousVideo.pause();
       previousVideo.currentTime = 0;
-      previousVideo.removeEventListener(
-        'ended',
-        endedHandlers.value[currentPlayingIndex.value - 1]
-      );
     }
   }
 
@@ -270,13 +266,19 @@ const onSlideChange = (e) => {
     };
     endedHandlers.value[currentPlayingIndex.value - 1] = handler;
     currentVideo.addEventListener('ended', handler);
+  }
 
-    // Preload next video if it exists
-    if (currentPlayingIndex.value < videoRefs.value.length) {
-      const nextVideo = videoRefs.value[currentPlayingIndex.value];
-      if (nextVideo.readyState === 0) {
-        // If the next video has not started loading yet
-        nextVideo.load(); // Starts loading the video
+  // Preload the next video.
+  if (currentPlayingIndex.value < videoRefs.value.length - 1) {
+    const nextVideo = videoRefs.value[currentPlayingIndex.value];
+    if (nextVideo) {
+      const videoSource = nextVideo.getElementsByTagName('source')[0];
+      if (videoSource && videoSource.src) {
+        const image = new Image();
+        image.src = videoSource.src;
+        console.log(
+          `Started preloading video at index ${currentPlayingIndex.value}`
+        );
       }
     }
   }
