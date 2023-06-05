@@ -133,11 +133,17 @@ const slides = [
 
 // Mounted
 onMounted(() => {
-  showOverlay.value = window.innerWidth < 768 && isMuted.value;
-  window.addEventListener('resize', () => {
-    showOverlay.value = window.innerWidth < 768 && isMuted.value;
-  });
 
+  // If desktop, unmute by default
+  if (window.innerWidth >= 768) {
+    isMuted.value = false;
+  }
+
+  // Show fouce unmute overloay on mobile
+  updateShowOverlay();
+  window.addEventListener('resize', updateShowOverlay);
+
+  // Swiper params
   const swiperParams = {
     autoplay: false,
     navigation: true,
@@ -157,6 +163,7 @@ onMounted(() => {
     ],
   };
 
+  // Assign params and init swiper instance
   Object.assign(swiperEl.value, swiperParams);
   swiperEl.value.initialize();
 
@@ -177,14 +184,17 @@ onMounted(() => {
 
 // To avoid memory leaks
 onUnmounted(() => {
-  window.removeEventListener('resize', () => {
-    showOverlay.value = window.innerWidth < 768 && isMuted.value;
-  });
+  window.removeEventListener('resize', updateShowOverlay);
 });
 
 // Init swiper
 const onInit = (e) => {
   console.log('swiper initialized');
+};
+
+// Update the mute/unmute overlay for mobile
+const updateShowOverlay = () => {
+  showOverlay.value = window.innerWidth < 768 && isMuted.value;
 };
 
 // Play each video
