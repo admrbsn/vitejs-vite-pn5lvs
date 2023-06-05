@@ -133,7 +133,6 @@ const slides = [
 
 // Mounted
 onMounted(() => {
-
   // If desktop, unmute by default
   if (window.innerWidth >= 768) {
     isMuted.value = false;
@@ -246,37 +245,39 @@ const toggleMute = () => {
 
 // Handle slide changing
 const onSlideChange = (e) => {
-  // Pause and reset the time of previous video if any
   if (currentPlayingIndex.value !== null && currentPlayingIndex.value !== 0) {
     const previousVideo = videoRefs.value[currentPlayingIndex.value - 1];
     if (previousVideo) {
       previousVideo.pause();
       previousVideo.currentTime = 0;
-      const previousHandler =
-        endedHandlers.value[currentPlayingIndex.value - 1];
-      if (previousHandler) {
-        previousVideo.removeEventListener('ended', previousHandler);
-      }
+      previousVideo.removeEventListener(
+        'ended',
+        endedHandlers.value[currentPlayingIndex.value - 1]
+      );
     }
   }
 
-  // Assign current video to real index value from Swiper
   currentPlayingIndex.value = e.detail[0].realIndex;
 
-  // Check if it's not the intro slide
-  if (currentPlayingIndex.value > 0) {
+  if (currentPlayingIndex.value !== 0) {
     const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
-    if (currentVideo) {
-      playVideo(currentVideo);
-      hasStartedPlaying.value = true;
-      isPlaying.value = true;
+    playVideo(currentVideo);
+    hasStartedPlaying.value = true;
+    isPlaying.value = true;
 
-      // Remove previous handler and add new one
-      const handler = function () {
-        swiperEl.value.swiper.slideNext();
-      };
-      endedHandlers.value[currentPlayingIndex.value - 1] = handler;
-      currentVideo.addEventListener('ended', handler);
+    const handler = function () {
+      swiperEl.value.swiper.slideNext();
+    };
+    endedHandlers.value[currentPlayingIndex.value - 1] = handler;
+    currentVideo.addEventListener('ended', handler);
+
+    // Preload next video if it exists
+    if (currentPlayingIndex.value < videoRefs.value.length) {
+      const nextVideo = videoRefs.value[currentPlayingIndex.value];
+      if (nextVideo.readyState === 0) {
+        // If the next video has not started loading yet
+        nextVideo.load(); // Starts loading the video
+      }
     }
   }
 };
