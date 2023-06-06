@@ -134,17 +134,18 @@ const endedHandlers = ref([]);
 // Video slides
 const slides = [
   {
+    // Tribute bumper
     type: 'video',
     src: 'https://player.vimeo.com/external/823050002.m3u8?s=3f3e42fa89c4193ccc3e30707faf593eccbb9696',
   },
   {
     type: 'video',
-    src: 'https://player.vimeo.com/external/759635579.m3u8?s=219ffe87caf9351cae8dad3c45c00f656ef35ad8',
+    src: 'https://player.vimeo.com/external/832639412.m3u8?s=af15996d49ebcb49d9444c3547919ad70256da15',
   },
   {
     type: 'html',
     content:
-      '<div class="w-1/2 h-1/2 flex flex-col items-center justify-center p-8 rounded-lg" style="background-color: #ffce50;"><div class="mb-6 text-black text-4xl font-semibold">Title slide</div><svg xmlns="http://www.w3.org/2000/svg" class="w-24" fill="none" viewBox="0 0 48 48" stroke-width="2"><path fill="#94e986" d="M3.13477 20.8571L10.4451 2H30.7769L23.4665 20.8571H34.3559L8.3129 46L11.3589 20.8571H3.13477Z"></path><path stroke="#000000" stroke-linejoin="round" d="M3.13477 20.8571L10.4451 2H30.7769L23.4665 20.8571H34.3559L8.3129 46L11.3589 20.8571H3.13477Z"></path><path fill="#ffce51" d="M34.3574 20.8564L8.31445 45.9993H18.823L44.866 20.8564H34.3574Z"></path><path fill="#ffce51" d="M30.7751 2L23.4648 20.8571H33.9734L41.2837 2H30.7751Z"></path><path stroke="#000000" stroke-linejoin="round" d="M34.3574 20.8564L8.31445 45.9993H18.823L44.866 20.8564H34.3574Z"></path><path stroke="#000000" stroke-linejoin="round" d="M30.7751 2L23.4648 20.8571H33.9734L41.2837 2H30.7751Z"></path></svg></div>',
+      '<div class="w-[600px] h-[400px] flex flex-col items-center justify-center p-8 rounded-lg" style="background-color: #ffce50;"><div class="mb-6 text-black text-4xl font-semibold">Title slide</div><svg xmlns="http://www.w3.org/2000/svg" class="w-24" fill="none" viewBox="0 0 48 48" stroke-width="2"><path fill="#94e986" d="M3.13477 20.8571L10.4451 2H30.7769L23.4665 20.8571H34.3559L8.3129 46L11.3589 20.8571H3.13477Z"></path><path stroke="#000000" stroke-linejoin="round" d="M3.13477 20.8571L10.4451 2H30.7769L23.4665 20.8571H34.3559L8.3129 46L11.3589 20.8571H3.13477Z"></path><path fill="#ffce51" d="M34.3574 20.8564L8.31445 45.9993H18.823L44.866 20.8564H34.3574Z"></path><path fill="#ffce51" d="M30.7751 2L23.4648 20.8571H33.9734L41.2837 2H30.7751Z"></path><path stroke="#000000" stroke-linejoin="round" d="M34.3574 20.8564L8.31445 45.9993H18.823L44.866 20.8564H34.3574Z"></path><path stroke="#000000" stroke-linejoin="round" d="M30.7751 2L23.4648 20.8571H33.9734L41.2837 2H30.7751Z"></path></svg></div>',
     duration: 5000,
   },
   {
@@ -354,8 +355,8 @@ const onSlideChange = (e) => {
         endedHandlers.value[currentPlayingIndex.value - 1] = handler;
         currentVideo.addEventListener('ended', handler);
       }
-      // Set background audio to 15% for video slides
-      Howler.volume(0.15);
+      // Set background audio to 25% for video slides
+      Howler.volume(0.25);
     }
   }
 };
