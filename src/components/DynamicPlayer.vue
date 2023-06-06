@@ -1,5 +1,5 @@
 <template>
-  <div class="dynamic-player">
+  <div class="dynamic-player max-w-3xl mx-auto">
     <swiper-container
       ref="swiperEl"
       init="false"
@@ -11,7 +11,7 @@
       <div
         slot="container-start"
         class="
-          fixed
+          absolute
           w-full
           z-10
           flex
@@ -161,9 +161,6 @@ const videoRefs = ref(slides.map(() => null));
 
 // Mounted
 onMounted(() => {
-  // Background audio
-  setTimeout(playSound, 7040); // 7040 milliseconds = 7.04 seconds
-
   // If desktop, unmute by default
   if (window.innerWidth >= 768) {
     isMuted.value = false;
@@ -183,7 +180,7 @@ onMounted(() => {
     injectStyles: [
       `
         :root {--swiper-theme-color: #fff;}
-        swiper-container {height:100%;background-color:#202124;}
+        swiper-container {height:100%;background-color:#35363a;}
         swiper-slide {display:flex;align-items:center;justify-content:center;color:#fff;}
         .swiper-button-next,.swiper-button-prev {z-index:9;}
         swiper-container.intro::part(button-prev) {display:none;}
@@ -258,6 +255,10 @@ const togglePlay = () => {
           isHTMLPaused.value = true;
         }
         isPlaying.value = false;
+        // Pause the background audio
+        if (sound.value) {
+          sound.value.pause();
+        }
       } else {
         if (currentSlide.type === 'video') {
           playVideo(videoRefs.value[swiperEl.value.swiper.realIndex - 1]);
@@ -267,6 +268,10 @@ const togglePlay = () => {
         }
         isPlaying.value = true;
         hasStartedPlaying.value = true;
+        // Play the background audio
+        if (sound.value) {
+          sound.value.play();
+        }
       }
     }
   }
@@ -321,6 +326,12 @@ const onSlideChange = (e) => {
 
   // Assign current video to real index value from Swiper
   currentPlayingIndex.value = e.detail[0].realIndex;
+  console.log('playing slide ' + currentPlayingIndex.value);
+
+  // Play background audio on the first real slide
+  if (currentPlayingIndex.value === 2) {
+    playSound();
+  }
 
   // Check if it's not the intro slide
   if (currentPlayingIndex.value > 0) {
@@ -336,7 +347,6 @@ const onSlideChange = (e) => {
         playVideo(currentVideo);
         hasStartedPlaying.value = true;
         isPlaying.value = true;
-
         // Remove previous handler and add new one
         const handler = function () {
           swiperEl.value.swiper.slideNext();
@@ -344,8 +354,8 @@ const onSlideChange = (e) => {
         endedHandlers.value[currentPlayingIndex.value - 1] = handler;
         currentVideo.addEventListener('ended', handler);
       }
-      // Set background audio to 10% for video slides
-      Howler.volume(0.1);
+      // Set background audio to 15% for video slides
+      Howler.volume(0.15);
     }
   }
 };
