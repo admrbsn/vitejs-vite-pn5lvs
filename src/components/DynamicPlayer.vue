@@ -28,7 +28,7 @@
         "
       >
         <!-- Tribute info -->
-        <div>To: Recipient</div>
+        <div>To: Pete</div>
 
         <!-- Overaly for mobile interaction -->
         <div v-show="showOverlay" class="overlay">
