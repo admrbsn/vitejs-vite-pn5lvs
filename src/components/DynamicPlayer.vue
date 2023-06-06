@@ -50,7 +50,11 @@
 
       <!-- Swiper slides -->
       <swiper-slide v-for="(slide, index) in slides" :key="index">
-        <div v-if="slide.type === 'html'" v-html="slide.content"></div>
+        <div
+          class="html-slide w-full h-full flex items-center justify-center"
+          v-if="slide.type === 'html'"
+          v-html="slide.content"
+        ></div>
         <video
           v-else-if="slide.type === 'video'"
           :ref="
@@ -133,7 +137,7 @@ const slides = [
   },
   {
     type: 'html',
-    content: '<div>Title slide</div>',
+    content: '<div><div class="text-4xl">Title slide</div></div>',
     duration: 5000,
   },
   {
@@ -260,6 +264,13 @@ const toggleMute = () => {
   }
 };
 
+// Check swiper to see if it's playing before auto-advancing
+const nextSlide = () => {
+  if (isPlaying.value) {
+    swiperEl.value.swiper.slideNext();
+  }
+};
+
 // Handle slide changing
 const onSlideChange = (e) => {
   // Clear any existing HTML slide timeout
@@ -290,9 +301,7 @@ const onSlideChange = (e) => {
     const slide = slides[currentPlayingIndex.value - 1];
     if (slide.type === 'html') {
       // If it's an HTML slide, wait for the duration and then advance to next slide
-      htmlSlideTimeout.value = setTimeout(() => {
-        swiperEl.value.swiper.slideNext();
-      }, slide.duration);
+      htmlSlideTimeout.value = setTimeout(nextSlide, slide.duration);
     } else if (slide.type === 'video') {
       const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
       if (currentVideo) {
