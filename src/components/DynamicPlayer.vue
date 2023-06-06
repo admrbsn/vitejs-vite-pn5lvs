@@ -112,6 +112,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { register } from 'swiper/element/bundle';
 import Hls from 'hls.js';
+import { Howl, Howler } from 'howler';
 register();
 
 // All of our reactive data
@@ -124,6 +125,7 @@ const swiperEl = ref(null);
 const currentPlayingIndex = ref(null);
 const isPlaying = ref(false);
 const isMuted = ref(true);
+const sound = ref(null);
 const hasStartedPlaying = ref(false);
 const htmlSlideTimeout = ref(null);
 const isHTMLPaused = ref(false);
@@ -159,6 +161,9 @@ const videoRefs = ref(slides.map(() => null));
 
 // Mounted
 onMounted(() => {
+  // Background audio
+  setTimeout(playSound, 7040); // 7040 milliseconds = 7.04 seconds
+
   // If desktop, unmute by default
   if (window.innerWidth >= 768) {
     isMuted.value = false;
@@ -269,13 +274,19 @@ const togglePlay = () => {
 
 // Toggle mute/unmute buttons
 const toggleMute = () => {
-  if (swiperEl.value && swiperEl.value.swiper) {
-    if (isMuted.value) {
-      isMuted.value = false;
-    } else {
-      isMuted.value = true;
+  isMuted.value = !isMuted.value;
+  showOverlay.value = window.innerWidth < 768 && isMuted.value;
+
+  // Update volume of videos
+  videoRefs.value.forEach((video) => {
+    if (video) {
+      video.muted = isMuted.value;
     }
-    showOverlay.value = window.innerWidth < 768 && isMuted.value;
+  });
+
+  // Update volume of background audio
+  if (sound.value) {
+    Howler.mute(isMuted.value);
   }
 };
 
@@ -317,6 +328,8 @@ const onSlideChange = (e) => {
     if (slide.type === 'html') {
       // If it's an HTML slide, wait for the duration and then advance to next slide
       htmlSlideTimeout.value = setTimeout(nextSlide, slide.duration);
+      // Set background audio to 100% for html slides
+      Howler.volume(1.0);
     } else if (slide.type === 'video') {
       const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
       if (currentVideo) {
@@ -331,8 +344,23 @@ const onSlideChange = (e) => {
         endedHandlers.value[currentPlayingIndex.value - 1] = handler;
         currentVideo.addEventListener('ended', handler);
       }
+      // Set background audio to 10% for video slides
+      Howler.volume(0.1);
     }
   }
+};
+
+// Background audio
+const playSound = () => {
+  if (!sound.value) {
+    sound.value = new Howl({
+      src: ['audio.mp3'],
+      autoplay: false,
+      loop: false,
+      volume: 1.0,
+    });
+  }
+  sound.value.play();
 };
 </script>
 
@@ -395,5 +423,8 @@ swiper-slide > video:hover + .hide-unless-hovered {
   width: 600px;
   height: 338.02px;
   background-color: #76cdbe;
+}
+.intro-slide + swiper-slide .hide-unless-hovered {
+  display: none;
 }
 </style>
