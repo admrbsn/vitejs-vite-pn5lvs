@@ -28,7 +28,13 @@
         "
       >
         <!-- Tribute info -->
-        <div>To: Pete</div>
+        <div class="flex items-center text-base">
+          <img
+            src="https://images.pexels.com/photos/4757976/pexels-photo-4757976.jpeg?auto=compress&cs=tinysrgb&w=800"
+            class="w-8 h-8 mr-2 rounded-full object-cover"
+          />
+          Pete
+        </div>
 
         <!-- Overaly for mobile interaction -->
         <div v-show="showOverlay" class="overlay">
