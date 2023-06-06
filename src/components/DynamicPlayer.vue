@@ -15,12 +15,14 @@
         slot="container-start"
         class="
           absolute
-          w-full
+          w-[calc(100%-1.5rem)]
+          md:w-full
           z-10
           flex
           items-center
           justify-between
-          p-5
+          py-3
+          md:p-6
           text-white text-sm
           font-semibold
         "
@@ -36,7 +38,7 @@
         <!-- Mute/Unmute button -->
         <button
           @click="toggleMute"
-          class="flex items-center justify-center z-10"
+          class="flex items-center justify-center z-10 mr-1 md:mr-0"
         >
           <img
             :src="isMuted ? volumeOffImage : volumeOnImage"
@@ -187,6 +189,7 @@ onMounted(() => {
       `
         :root {--swiper-theme-color: #fff;}
         swiper-container {height:100%;background-color:#35363a;}
+        @media (max-width: 767px) {swiper-container {padding:0.75rem;}}
         swiper-slide {display:flex;align-items:center;justify-content:center;color:#fff;transition:all 0.5s ease-out;}
         .swiper-button-next,.swiper-button-prev {z-index:9;}
         swiper-container.intro::part(button-prev) {display:none;}
