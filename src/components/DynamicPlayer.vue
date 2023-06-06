@@ -45,16 +45,18 @@
 
       <!-- Intro slide -->
       <swiper-slide class="intro-slide">
-        <div></div>
+        <div class="rounded-lg"></div>
       </swiper-slide>
 
       <!-- Swiper slides -->
       <swiper-slide v-for="(slide, index) in slides" :key="index">
+        <!-- HTML slide type -->
         <div
           class="html-slide w-full h-full flex items-center justify-center"
           v-if="slide.type === 'html'"
           v-html="slide.content"
         ></div>
+        <!-- Video slide type -->
         <video
           v-else-if="slide.type === 'video'"
           :ref="
@@ -69,6 +71,7 @@
           :muted="isMuted"
           preload="auto"
           :id="'video-' + index"
+          class="rounded-lg"
         >
           <source :src="slide.src" type="application/x-mpegURL" />
         </video>
@@ -123,6 +126,7 @@ const isPlaying = ref(false);
 const isMuted = ref(true);
 const hasStartedPlaying = ref(false);
 const htmlSlideTimeout = ref(null);
+const isHTMLPaused = ref(false);
 const endedHandlers = ref([]);
 
 // Video slides
@@ -137,7 +141,8 @@ const slides = [
   },
   {
     type: 'html',
-    content: '<div><div class="text-4xl">Title slide</div></div>',
+    content:
+      '<div class="w-1/2 h-1/2 flex flex-col items-center justify-center p-8 rounded-lg" style="background-color: #ffce50;"><div class="mb-6 text-black text-4xl font-semibold">Title slide</div><svg xmlns="http://www.w3.org/2000/svg" class="w-24" fill="none" viewBox="0 0 48 48" stroke-width="2"><path fill="#94e986" d="M3.13477 20.8571L10.4451 2H30.7769L23.4665 20.8571H34.3559L8.3129 46L11.3589 20.8571H3.13477Z"></path><path stroke="#000000" stroke-linejoin="round" d="M3.13477 20.8571L10.4451 2H30.7769L23.4665 20.8571H34.3559L8.3129 46L11.3589 20.8571H3.13477Z"></path><path fill="#ffce51" d="M34.3574 20.8564L8.31445 45.9993H18.823L44.866 20.8564H34.3574Z"></path><path fill="#ffce51" d="M30.7751 2L23.4648 20.8571H33.9734L41.2837 2H30.7751Z"></path><path stroke="#000000" stroke-linejoin="round" d="M34.3574 20.8564L8.31445 45.9993H18.823L44.866 20.8564H34.3574Z"></path><path stroke="#000000" stroke-linejoin="round" d="M30.7751 2L23.4648 20.8571H33.9734L41.2837 2H30.7751Z"></path></svg></div>',
     duration: 5000,
   },
   {
@@ -235,16 +240,26 @@ const playVideo = (video) => {
 // Toggle play/pause buttons
 const togglePlay = () => {
   if (swiperEl.value && swiperEl.value.swiper) {
-    const currentVideo =
+    const currentSlide =
       swiperEl.value.swiper.realIndex > 0
-        ? videoRefs.value[swiperEl.value.swiper.realIndex - 1]
+        ? slides[swiperEl.value.swiper.realIndex - 1]
         : null;
-    if (currentVideo) {
+    if (currentSlide) {
       if (isPlaying.value) {
-        currentVideo.pause();
+        if (currentSlide.type === 'video') {
+          videoRefs.value[swiperEl.value.swiper.realIndex - 1].pause();
+        } else if (currentSlide.type === 'html') {
+          clearTimeout(htmlSlideTimeout.value);
+          isHTMLPaused.value = true;
+        }
         isPlaying.value = false;
       } else {
-        playVideo(currentVideo);
+        if (currentSlide.type === 'video') {
+          playVideo(videoRefs.value[swiperEl.value.swiper.realIndex - 1]);
+        } else if (currentSlide.type === 'html' && isHTMLPaused.value) {
+          htmlSlideTimeout.value = setTimeout(nextSlide, currentSlide.duration);
+          isHTMLPaused.value = false;
+        }
         isPlaying.value = true;
         hasStartedPlaying.value = true;
       }
