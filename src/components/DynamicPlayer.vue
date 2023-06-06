@@ -5,7 +5,10 @@
       init="false"
       @init="onInit"
       @slidechange="onSlideChange"
-      :class="{ intro: !hasStartedPlaying }"
+      :class="[
+        { intro: !hasStartedPlaying, bumper: tributeBumperPlaying },
+        'slide-' + currentPlayingIndex,
+      ]"
     >
       <!-- Video header with Tribute info and mute button -->
       <div
@@ -127,6 +130,7 @@ const isPlaying = ref(false);
 const isMuted = ref(true);
 const sound = ref(null);
 const hasStartedPlaying = ref(false);
+const tributeBumperPlaying = ref(false);
 const htmlSlideTimeout = ref(null);
 const isHTMLPaused = ref(false);
 const endedHandlers = ref([]);
@@ -185,6 +189,9 @@ onMounted(() => {
         swiper-slide {display:flex;align-items:center;justify-content:center;color:#fff;}
         .swiper-button-next,.swiper-button-prev {z-index:9;}
         swiper-container.intro::part(button-prev) {display:none;}
+        swiper-container.bumper::part(button-prev) {display:none;}
+        swiper-container.bumper::part(button-next) {display:none;}
+        swiper-container.slide-2::part(button-prev) {opacity:.35;cursor: auto;pointer-events:none;}
         swiper-container.intro::part(button-next) {position:absolute;top:50%;right:0;left:0;display:flex;align-items:center;justify-content:center;width:4rem;height:4rem;margin:auto;background-color:#fff;border-radius:99px;transform:translateY(-50%);}
         swiper-container.intro::part(button-next):after {content:url('play.svg');width:2rem;height:2rem;margin-left:0.375rem;line-height:0;}
       `,
@@ -329,9 +336,14 @@ const onSlideChange = (e) => {
   currentPlayingIndex.value = e.detail[0].realIndex;
   console.log('playing slide ' + currentPlayingIndex.value);
 
+  if (currentPlayingIndex.value === 1) {
+    tributeBumperPlaying.value = true;
+  }
+
   // Play background audio on the first real slide
   if (currentPlayingIndex.value === 2) {
     playSound();
+    tributeBumperPlaying.value = false;
   }
 
   // Check if it's not the intro slide
