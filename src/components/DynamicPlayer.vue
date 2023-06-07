@@ -223,8 +223,12 @@ onMounted(() => {
       type: 'progressbar',
     },
     on: {
-      slideNextTransitionStart: preloadAdjacentVideos,
-      slidePrevTransitionStart: preloadAdjacentVideos,
+      slideNextTransitionStart: function () {
+        preloadAdjacentVideos(this.activeIndex);
+      },
+      slidePrevTransitionStart: function () {
+        preloadAdjacentVideos(this.activeIndex);
+      },
     },
     injectStyles: [
       `
@@ -426,16 +430,17 @@ const onSlideChange = (e) => {
 };
 
 // Preload videos in adjacent slides
-const preloadAdjacentVideos = () => {
-  if (swiperEl.value && swiperEl.value.swiper) {
-    const currentIndex = swiperEl.value.swiper.activeIndex;
-    const preloadIndices = [currentIndex - 1, currentIndex, currentIndex + 1];
+const preloadAdjacentVideos = (index) => {
+  // Preload previous video if any
+  const previousVideo = videoRefs.value[index - 1];
+  if (previousVideo && previousVideo.readyState < 3) {
+    previousVideo.load();
+  }
 
-    videoRefs.value.forEach((video, index) => {
-      if (video && slides[index].type === 'video') {
-        video.preload = preloadIndices.includes(index) ? 'auto' : 'metadata';
-      }
-    });
+  // Preload next video if any
+  const nextVideo = videoRefs.value[index + 1];
+  if (nextVideo && nextVideo.readyState < 3) {
+    nextVideo.load();
   }
 };
 
