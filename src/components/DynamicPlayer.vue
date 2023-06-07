@@ -387,7 +387,7 @@ const onSlideChange = (e) => {
       // If it's an HTML slide, wait for the duration and then advance to next slide
       htmlSlideTimeout.value = setTimeout(nextSlide, slide.duration);
       // Set background audio to 100% for html slides
-      Howler.volume(1.0);
+      Howler.volume(0.75);
     } else if (slide.type === 'video') {
       const currentVideo = videoRefs.value[currentPlayingIndex.value - 1];
       if (currentVideo) {
@@ -401,8 +401,8 @@ const onSlideChange = (e) => {
         endedHandlers.value[currentPlayingIndex.value - 1] = handler;
         currentVideo.addEventListener('ended', handler);
       }
-      // Set background audio to 25% for video slides
-      Howler.volume(0.25);
+      // Set background audio to 50% for video slides
+      Howler.volume(0.5);
     }
   }
 };
