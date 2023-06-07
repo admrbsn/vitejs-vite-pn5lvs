@@ -5,6 +5,7 @@
 @layer base {
   body {
     margin: 0;
+    font-family: 'Figtree', sans-serif;
   }
   #app {
     background-color: #202124;

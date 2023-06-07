@@ -1,5 +1,5 @@
 <template>
-  <div class="dynamic-player max-w-3xl mx-auto">
+  <div class="dynamic-player max-w-2xl mx-auto">
     <swiper-container
       ref="swiperEl"
       init="false"
@@ -33,7 +33,7 @@
             src="https://images.pexels.com/photos/4757976/pexels-photo-4757976.jpeg?auto=compress&cs=tinysrgb&w=800"
             class="w-8 h-8 mr-2 rounded-full object-cover"
           />
-          Pete
+          Tribute for Pete
         </div>
 
         <!-- Overaly for mobile interaction -->
@@ -68,24 +68,36 @@
           v-html="slide.content"
         ></div>
         <!-- Video slide type -->
-        <video
-          v-else-if="slide.type === 'video'"
-          :ref="
-            (el) => {
-              videoRefs[index] = el;
-            }
-          "
-          width="600"
-          height="400"
-          playsinline
-          autobuffer
-          :muted="isMuted"
-          preload="auto"
-          :id="'video-' + index"
-          class="rounded-lg"
-        >
-          <source :src="slide.src" type="application/x-mpegURL" />
-        </video>
+        <div v-else-if="slide.type === 'video'" class="w-full">
+          <video
+            :ref="
+              (el) => {
+                blurredVideoRefs[index] = el;
+              }
+            "
+            class="blur-bg-video absolute top-0 left-0 blur-2xl"
+            autoplay
+            muted
+            loop
+          >
+            <source :src="slide.mp4" type="video/mp4" />
+          </video>
+          <video
+            :ref="
+              (el) => {
+                videoRefs[index] = el;
+              }
+            "
+            playsinline
+            autobuffer
+            :muted="isMuted"
+            preload="auto"
+            :id="'video-' + index"
+            class="relative z-10 w-full h-full"
+          >
+            <source :src="slide.hls" type="application/x-mpegURL" />
+          </video>
+        </div>
         <!-- Play/pause button -->
         <button
           @click="togglePlay"
@@ -100,6 +112,7 @@
             h-16
             items-center
             justify-center
+            z-20
             m-auto
             bg-white
             rounded-full
@@ -148,11 +161,13 @@ const slides = [
   {
     // Tribute bumper
     type: 'video',
-    src: 'https://player.vimeo.com/external/823050002.m3u8?s=3f3e42fa89c4193ccc3e30707faf593eccbb9696',
+    hls: 'https://player.vimeo.com/external/834147408.m3u8?s=d5c93d439ae555eb5f34886d4193a946040db4bd',
+    mp4: 'https://player.vimeo.com/progressive_redirect/playback/834147408/rendition/720p/file.mp4?loc=external&signature=9cd831b08b33525f2ce17200a927d5a179b91667186bc7f7263eb850396b4fba',
   },
   {
     type: 'video',
-    src: 'https://player.vimeo.com/external/832639412.m3u8?s=af15996d49ebcb49d9444c3547919ad70256da15',
+    hls: 'https://player.vimeo.com/external/832639412.m3u8?s=af15996d49ebcb49d9444c3547919ad70256da15',
+    mp4: 'https://player.vimeo.com/progressive_redirect/playback/832639412/rendition/720p/file.mp4?loc=external&signature=a9438d9f7b9652f034fd4a3d26764f87ac293fbaf06d268c86d23ad78155c130',
   },
   {
     type: 'html',
@@ -162,15 +177,18 @@ const slides = [
   },
   {
     type: 'video',
-    src: 'https://player.vimeo.com/external/832639348.m3u8?s=3f11e4fe435908857eb79bc44a44ddcd16a5733e',
+    hls: 'https://player.vimeo.com/external/832639348.m3u8?s=3f11e4fe435908857eb79bc44a44ddcd16a5733e',
+    mp4: 'https://player.vimeo.com/progressive_redirect/playback/832639348/rendition/720p/file.mp4?loc=external&signature=3d826abcf784440c8b3970c3d2f5788e5fe7b2b25d58011bda742a827836320b',
   },
   {
     type: 'video',
-    src: 'https://player.vimeo.com/external/832639376.m3u8?s=2d8046d016c0c46c925f64d4c1e61bc148dacd46',
+    hls: 'https://player.vimeo.com/external/832639376.m3u8?s=2d8046d016c0c46c925f64d4c1e61bc148dacd46',
+    mp4: 'https://player.vimeo.com/progressive_redirect/playback/832639376/rendition/720p/file.mp4?loc=external&signature=85694be4f99c5d6c889535036f6ebb438308c500578166ea0ec35ea94573a03a',
   },
 ];
 // Define videoRefs as an array of refs initially filled with null
 const videoRefs = ref(slides.map(() => null));
+const blurredVideoRefs = ref(slides.map(() => null));
 
 // Mounted
 onMounted(() => {
@@ -187,20 +205,20 @@ onMounted(() => {
   const swiperParams = {
     autoplay: false,
     navigation: true,
-    //effect: 'fade',
     pagination: {
       type: 'progressbar',
     },
     injectStyles: [
       `
         :root {--swiper-theme-color: #fff;}
-        swiper-container {height:100%;background-color:#35363a;}
+        swiper-container {height:100%;background-color:#35363a;box-shadow:inset 0px 100px 50px -50px rgba(0,0,0,.25);}
         @media (max-width: 767px) {swiper-container {padding:0.75rem;}}
         swiper-slide {display:flex;align-items:center;justify-content:center;color:#fff;transition:all 0.5s ease-out;}
         .swiper-button-next,.swiper-button-prev {z-index:9;}
         swiper-container.intro::part(button-prev) {display:none;}
         swiper-container.bumper::part(button-prev) {display:none;}
         swiper-container.bumper::part(button-next) {display:none;}
+        swiper-container.bumper .blur-bg-video {display:none;}
         swiper-container.slide-2::part(button-prev) {opacity:.35;cursor: auto;pointer-events:none;}
         swiper-container.intro::part(button-next) {position:absolute;top:50%;right:0;left:0;display:flex;align-items:center;justify-content:center;width:4rem;height:4rem;margin:auto;background-color:#fff;border-radius:99px;transform:translateY(-50%);}
         swiper-container.intro::part(button-next):after {content:url('play.svg');width:2rem;height:2rem;margin-left:0.375rem;line-height:0;}
@@ -218,7 +236,7 @@ onMounted(() => {
   slides.forEach((slide, index) => {
     if (slide.type === 'video' && Hls.isSupported() && videoRefs.value[index]) {
       var hls = new Hls();
-      hls.loadSource(slide.src);
+      hls.loadSource(slide.hls);
       hls.attachMedia(videoRefs.value[index]);
       videoRefs.value[index].onended = () => {
         if (swiperEl.value && swiperEl.value.swiper) {
@@ -270,6 +288,7 @@ const togglePlay = () => {
       if (isPlaying.value) {
         if (currentSlide.type === 'video') {
           videoRefs.value[swiperEl.value.swiper.realIndex - 1].pause();
+          blurredVideoRefs.value[swiperEl.value.swiper.realIndex - 1].pause();
         } else if (currentSlide.type === 'html') {
           clearTimeout(htmlSlideTimeout.value);
           isHTMLPaused.value = true;
@@ -282,6 +301,9 @@ const togglePlay = () => {
       } else {
         if (currentSlide.type === 'video') {
           playVideo(videoRefs.value[swiperEl.value.swiper.realIndex - 1]);
+          playVideo(
+            blurredVideoRefs.value[swiperEl.value.swiper.realIndex - 1]
+          );
         } else if (currentSlide.type === 'html' && isHTMLPaused.value) {
           htmlSlideTimeout.value = setTimeout(nextSlide, currentSlide.duration);
           isHTMLPaused.value = false;
@@ -457,9 +479,13 @@ swiper-slide > video:hover + .hide-unless-hovered {
 .intro-slide div {
   width: 600px;
   height: 338.02px;
-  background-color: #76cdbe;
+  background-color: #f2615b;
 }
 .intro-slide + swiper-slide .hide-unless-hovered {
   display: none;
+}
+.intro,
+.bumper {
+  background-color: #f2615b;
 }
 </style>
