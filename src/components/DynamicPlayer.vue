@@ -174,13 +174,18 @@ const slides = [
   },
   {
     type: 'video',
+    hls: 'https://player.vimeo.com/external/834176404.m3u8?s=625cd0be4dea8efe8130fe2635ca697b7520aad1',
+    mp4: 'https://player.vimeo.com/progressive_redirect/playback/834176404/rendition/720p/file.mp4?loc=external&signature=6b55173801b71c98213f38ca47d33a5667b4f6f93931b718240827a40ca38f37',
+  },
+  {
+    type: 'video',
     hls: 'https://player.vimeo.com/external/832639412.m3u8?s=af15996d49ebcb49d9444c3547919ad70256da15',
     mp4: 'https://player.vimeo.com/progressive_redirect/playback/832639412/rendition/720p/file.mp4?loc=external&signature=a9438d9f7b9652f034fd4a3d26764f87ac293fbaf06d268c86d23ad78155c130',
   },
   {
     type: 'html',
     content:
-      '<div class="w-[600px] h-[400px] flex flex-col items-center justify-center p-8 rounded-lg" style="background-color: #ffce50;"><div class="mb-6 text-black text-4xl font-semibold">Title slide</div><svg xmlns="http://www.w3.org/2000/svg" class="w-24" fill="none" viewBox="0 0 48 48" stroke-width="2"><path fill="#94e986" d="M3.13477 20.8571L10.4451 2H30.7769L23.4665 20.8571H34.3559L8.3129 46L11.3589 20.8571H3.13477Z"></path><path stroke="#000000" stroke-linejoin="round" d="M3.13477 20.8571L10.4451 2H30.7769L23.4665 20.8571H34.3559L8.3129 46L11.3589 20.8571H3.13477Z"></path><path fill="#ffce51" d="M34.3574 20.8564L8.31445 45.9993H18.823L44.866 20.8564H34.3574Z"></path><path fill="#ffce51" d="M30.7751 2L23.4648 20.8571H33.9734L41.2837 2H30.7751Z"></path><path stroke="#000000" stroke-linejoin="round" d="M34.3574 20.8564L8.31445 45.9993H18.823L44.866 20.8564H34.3574Z"></path><path stroke="#000000" stroke-linejoin="round" d="M30.7751 2L23.4648 20.8571H33.9734L41.2837 2H30.7751Z"></path></svg></div>',
+      '<div class="w-full h-full flex flex-col items-center justify-center p-16" style="background-color: #fec7ce;"><img src="title.svg"></div>',
     duration: 5000,
   },
   {
