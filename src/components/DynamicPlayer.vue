@@ -15,13 +15,13 @@
         slot="container-start"
         class="
           absolute
-          w-[calc(100%-1.5rem)]
-          md:w-full
+          w-full
           z-10
           flex
           items-center
           justify-between
-          py-3
+          py-6
+          px-3
           md:p-6
           text-white text-sm
           font-semibold
@@ -44,7 +44,7 @@
         <!-- Mute/Unmute button -->
         <button
           @click="toggleMute"
-          class="flex items-center justify-center z-10 mr-1 md:mr-0"
+          class="flex items-center justify-center z-10"
         >
           <img
             :src="isMuted ? volumeOffImage : volumeOnImage"
@@ -75,7 +75,15 @@
                 blurredVideoRefs[index] = el;
               }
             "
-            class="blur-bg-video absolute top-0 left-0 blur-2xl"
+            class="
+              blur-bg-video
+              absolute
+              top-0
+              left-0
+              h-full
+              object-cover
+              blur-2xl
+            "
             autoplay
             muted
             loop
@@ -212,7 +220,6 @@ onMounted(() => {
       `
         :root {--swiper-theme-color: #fff;}
         swiper-container {height:100%;background-color:#35363a;box-shadow:inset 0px 100px 50px -50px rgba(0,0,0,.25);}
-        @media (max-width: 767px) {swiper-container {padding:0.75rem;}}
         swiper-slide {display:flex;align-items:center;justify-content:center;color:#fff;transition:all 0.5s ease-out;}
         .swiper-button-next,.swiper-button-prev {z-index:9;}
         swiper-container.intro::part(button-prev) {display:none;}
@@ -224,6 +231,7 @@ onMounted(() => {
         swiper-container.intro::part(button-next):after {content:url('play.svg');width:2rem;height:2rem;margin-left:0.375rem;line-height:0;}
         swiper-slide.swiper-slide-active {opacity:1;}
         swiper-slide:not(.swiper-slide-active) {opacity:0;}
+        .swiper-pagination-progressbar.swiper-pagination-horizontal {z-index:9;}
       `,
     ],
   };
