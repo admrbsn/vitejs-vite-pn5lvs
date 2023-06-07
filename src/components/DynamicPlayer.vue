@@ -31,7 +31,7 @@
         <div class="flex items-center text-base">
           <img
             src="https://images.pexels.com/photos/4757976/pexels-photo-4757976.jpeg?auto=compress&cs=tinysrgb&w=800"
-            class="w-8 h-8 mr-2 rounded-full object-cover"
+            class="w-8 h-8 mr-2 rounded-full border-2 border-white object-cover"
           />
           Tribute for Pete
         </div>
@@ -221,14 +221,6 @@ onMounted(() => {
     navigation: true,
     pagination: {
       type: 'progressbar',
-    },
-    on: {
-      slideNextTransitionStart: function () {
-        preloadAdjacentVideos(this.activeIndex);
-      },
-      slidePrevTransitionStart: function () {
-        preloadAdjacentVideos(this.activeIndex);
-      },
     },
     injectStyles: [
       `
@@ -426,21 +418,6 @@ const onSlideChange = (e) => {
       // Set background audio to 50% for video slides
       Howler.volume(0.5);
     }
-  }
-};
-
-// Preload videos in adjacent slides
-const preloadAdjacentVideos = (index) => {
-  // Preload previous video if any
-  const previousVideo = videoRefs.value[index - 1];
-  if (previousVideo && previousVideo.readyState < 3) {
-    previousVideo.load();
-  }
-
-  // Preload next video if any
-  const nextVideo = videoRefs.value[index + 1];
-  if (nextVideo && nextVideo.readyState < 3) {
-    nextVideo.load();
   }
 };
 
