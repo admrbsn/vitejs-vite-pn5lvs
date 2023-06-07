@@ -102,6 +102,7 @@
             preload="auto"
             :id="'video-' + index"
             class="relative z-10 w-full h-full"
+            @loadeddata="console.log(`Video at index ${index} loaded.`)"
           >
             <source :src="slide.hls" type="application/x-mpegURL" />
           </video>
@@ -220,6 +221,10 @@ onMounted(() => {
     navigation: true,
     pagination: {
       type: 'progressbar',
+    },
+    on: {
+      slideNextTransitionStart: preloadAdjacentVideos,
+      slidePrevTransitionStart: preloadAdjacentVideos,
     },
     injectStyles: [
       `
@@ -417,6 +422,20 @@ const onSlideChange = (e) => {
       // Set background audio to 50% for video slides
       Howler.volume(0.5);
     }
+  }
+};
+
+// Preload videos in adjacent slides
+const preloadAdjacentVideos = () => {
+  if (swiperEl.value && swiperEl.value.swiper) {
+    const currentIndex = swiperEl.value.swiper.activeIndex;
+    const preloadIndices = [currentIndex - 1, currentIndex, currentIndex + 1];
+
+    videoRefs.value.forEach((video, index) => {
+      if (video && slides[index].type === 'video') {
+        video.preload = preloadIndices.includes(index) ? 'auto' : 'metadata';
+      }
+    });
   }
 };
 
